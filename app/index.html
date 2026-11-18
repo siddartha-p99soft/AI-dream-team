@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f7f5">
+    <meta name="description" content="A clear, at-a-glance view of project progress, ownership, activity, and priority.">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="dashboard__header">
+        <div>
+          <p class="dashboard__eyebrow">Team overview</p>
+          <h1>Project Pulse</h1>
+          <p class="dashboard__intro">A shared snapshot of what teams are building, what needs attention, and what moved forward recently.</p>
+        </div>
+      </header>
+
+      <section aria-labelledby="projects-heading">
+        <div class="dashboard__section-heading">
+          <h2 id="projects-heading">Projects</h2>
+          <p id="project-count"></p>
+        </div>
+        <p id="load-state" role="status" aria-live="polite">Loading projects…</p>
+        <ul class="project-list" id="project-list" aria-labelledby="projects-heading"></ul>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const list = document.getElementById("project-list");
+        const loadState = document.getElementById("load-state");
+        const projectCount = document.getElementById("project-count");
+
+        const makeElement = (tag, className, text) => {
+          const element = document.createElement(tag);
+          if (className) element.className = className;
+          if (text !== undefined) element.textContent = text;
+          return element;
+        };
+
+        const dataToken = (value) => String(value).trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+        const renderProject = (project) => {
+          const item = makeElement("li");
+          const card = makeElement("article", "project-card");
+          const header = makeElement("div", "project-card__header");
+          const title = makeElement("h3", "", project.name);
+          const status = makeElement("span", "status-badge", project.status);
+          const statusToken = dataToken(project.status);
+          status.dataset.status = statusToken === "planning" ? "planned" : statusToken;
+          status.setAttribute("aria-label", `Status: ${project.status}`);
+          header.append(title, status);
+          card.append(header);
+
+          if (typeof project.summary === "string" && project.summary.trim()) {
+            card.append(makeElement("p", "project-card__summary", project.summary));
+          }
+
+          const meta = makeElement("div", "project-card__meta");
+          meta.append(makeElement("span", "project-card__owner", `Owner: ${project.owner}`));
+          const priority = makeElement("span", "priority-badge", `Priority: ${project.priority}`);
+          priority.dataset.priority = dataToken(project.priority);
+          meta.append(priority);
+          card.append(meta);
+
+          const activity = makeElement("div", "recent-activity");
+          activity.append(
+            makeElement("span", "recent-activity__label", "Recent activity"),
+            makeElement("p", "", project.recentActivity)
+          );
+          card.append(activity);
+          item.append(card);
+          return item;
+        };
+
+        const showError = () => {
+          loadState.replaceChildren();
+          loadState.setAttribute("role", "alert");
+          loadState.append(document.createTextNode("Project data could not be loaded. "));
+          const retry = makeElement("button", "", "Try again");
+          retry.type = "button";
+          retry.addEventListener("click", loadProjects);
+          loadState.append(retry);
+        };
+
+        async function loadProjects() {
+          loadState.setAttribute("role", "status");
+          loadState.textContent = "Loading projects…";
+          projectCount.textContent = "";
+          list.replaceChildren();
+          try {
+            const response = await fetch("project-data.json");
+            if (!response.ok) throw new Error("Project data request failed");
+            const data = await response.json();
+            if (!data || !Array.isArray(data.projects)) throw new Error("Project data is invalid");
+
+            const projects = data.projects.filter((project) =>
+              project && ["name", "owner", "status", "recentActivity", "priority"].every(
+                (field) => typeof project[field] === "string"
+              )
+            );
+            if (projects.length === 0) {
+              loadState.textContent = "No projects to show yet.";
+              return;
+            }
+
+            list.replaceChildren(...projects.map(renderProject));
+            projectCount.textContent = `${projects.length} ${projects.length === 1 ? "project" : "projects"}`;
+            loadState.textContent = "";
+          } catch (error) {
+            console.error("Failed to load project data:", error);
+            showError();
+          }
+        }
+
+        loadProjects();
+      })();
+    </script>
+  </body>
+</html>

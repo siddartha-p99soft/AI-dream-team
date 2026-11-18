@@ -1,0 +1,44 @@
+{
+  "projects": [
+    {
+      "name": "Atlas Design System",
+      "owner": "Maya Chen",
+      "status": "On track",
+      "recentActivity": "Published updated form components and accessibility guidance.",
+      "priority": "High",
+      "summary": "Shared UI foundations for product teams."
+    },
+    {
+      "name": "Northstar Analytics",
+      "owner": "Jordan Lee",
+      "status": "At risk",
+      "recentActivity": "Data ingestion review surfaced two open reliability issues.",
+      "priority": "High",
+      "summary": "A clearer view of product usage and engagement."
+    },
+    {
+      "name": "Community Hub",
+      "owner": "Avery Patel",
+      "status": "In progress",
+      "recentActivity": "Contributor onboarding flow is ready for feedback.",
+      "priority": "Medium",
+      "summary": "A welcoming home for community updates and events."
+    },
+    {
+      "name": "Greenfield Mobile",
+      "owner": "Riley Morgan",
+      "status": "Planning",
+      "recentActivity": "The team aligned on the first release milestones.",
+      "priority": "Medium",
+      "summary": "A lightweight mobile experience for field teams."
+    },
+    {
+      "name": "Docs Refresh",
+      "owner": "Sam Rivera",
+      "status": "On track",
+      "recentActivity": "Quick-start guides were reorganized for new contributors.",
+      "priority": "Low",
+      "summary": "Make project documentation easier to discover and maintain."
+    }
+  ]
+}
